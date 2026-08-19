@@ -1,0 +1,89 @@
+---
+title: 'Get office ID'
+description: 'Resolve an office in the publisher system and return its generated office_id'
+openapi: 'integrations/openapi.json GET /offices'
+---
+
+## Overview
+
+Look up an office by `name` and/or `id` and return the publisher-generated `office_id`. Targeter uses this before [creating an ad](/integrations/ads/create). If the office does not exist, Targeter may [create it](/integrations/offices/create).
+
+Provide at least one query parameter.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Query Parameters
+
+<ParamField query="name" type="string">
+    Office display name as known in Targeter
+</ParamField>
+
+<ParamField query="id" type="string">
+    Publisher-generated office id, if already known
+</ParamField>
+
+### Example Request
+
+```bash
+curl "https://publisher.example.com/v1/offices?name=Torshov" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="office_id" type="string">
+    Publisher-generated office id
+</ResponseField>
+
+<ResponseField name="name" type="string">
+    Office display name
+</ResponseField>
+
+```json
+{
+    "office_id": "off_8k2mQx",
+    "name": "Torshov"
+}
+```
+
+## Error Responses
+
+### 400 - Invalid request payload
+
+Neither `name` nor `id` was provided.
+
+```json
+{
+    "error": "Provide name or id"
+}
+```
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Office not found
+
+```json
+{
+    "error": "Office not found"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

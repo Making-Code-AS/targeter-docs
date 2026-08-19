@@ -1,0 +1,221 @@
+---
+title: 'Create ad'
+description: 'Create an ad under a Targeter campaign on the publisher'
+openapi: 'integrations/openapi.json POST /ads'
+---
+
+## Overview
+
+Create an ad in the publisher system. Targeter sends the campaign, office, flight, targeting, goal, platforms, and creatives. You generate `ad_id` and return the initial `status` (typically `pending_review` or `scheduled`).
+
+Resolve [`office_id`](/integrations/offices/get) and [`publisher_platforms`](/integrations/platforms/get) before calling this endpoint.
+
+At least one creative in `material` is required: `images`, `videos`, or `html5`.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+- `Content-Type: application/json`
+
+### Body Parameters
+
+<ParamField path="campaign_id" type="string" required>
+    Targeter campaign id this ad belongs to. Store and return it unchanged.
+</ParamField>
+
+<ParamField path="office_id" type="string" required>
+    Publisher office id from [Create office](/integrations/offices/create) or [Get office ID](/integrations/offices/get)
+</ParamField>
+
+<ParamField path="name" type="string" required>
+    Ad name / title (for example a property address)
+</ParamField>
+
+<ParamField path="budget" type="number" required>
+    Spend cap for the ad
+</ParamField>
+
+<ParamField path="target_location" type="object" required>
+    Geographic targeting
+</ParamField>
+
+<ParamField path="target_location.country" type="string" required>
+    ISO 3166-1 alpha-2 country code
+</ParamField>
+
+<ParamField path="target_location.regions" type="string[]">
+    Region or county names
+</ParamField>
+
+<ParamField path="target_location.cities" type="string[]">
+    City names
+</ParamField>
+
+<ParamField path="target_location.radius_km" type="number">
+    Optional radius in kilometres around the given cities
+</ParamField>
+
+<ParamField path="start_date" type="string" required>
+    First day the ad may deliver (inclusive), `YYYY-MM-DD`
+</ParamField>
+
+<ParamField path="end_date" type="string" required>
+    Last day the ad may deliver (inclusive), `YYYY-MM-DD`. Must be on or after `start_date`.
+</ParamField>
+
+<ParamField path="goal_config" type="object" required>
+    What Targeter is optimizing for
+</ParamField>
+
+<ParamField path="goal_config.objective" type="string" required>
+    `traffic`, `conversions`, `awareness`, or `leads`
+</ParamField>
+
+<ParamField path="goal_config.optimization_event" type="string">
+    `impression`, `link_click`, `landing_page_view`, `lead`, or `purchase`
+</ParamField>
+
+<ParamField path="publisher_platforms" type="string[]" required>
+    Platform ids from [Get publisher platforms](/integrations/platforms/get). At least one required.
+</ParamField>
+
+<ParamField path="material" type="object" required>
+    Landing page and creatives
+</ParamField>
+
+<ParamField path="material.target_url" type="string" required>
+    Landing page URL for the ad
+</ParamField>
+
+<ParamField path="material.images" type="string[]">
+    Publicly reachable image URLs
+</ParamField>
+
+<ParamField path="material.videos" type="string[]">
+    Publicly reachable video URLs
+</ParamField>
+
+<ParamField path="material.html5" type="string[]">
+    Publicly reachable HTML5 creative URLs
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST "https://publisher.example.com/v1/ads" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaign_id": "AbC123xyz",
+    "office_id": "off_8k2mQx",
+    "name": "Majorstuenveien 14",
+    "budget": 5000,
+    "target_location": {
+      "country": "NO",
+      "cities": ["Oslo"],
+      "radius_km": 10
+    },
+    "start_date": "2026-08-20",
+    "end_date": "2026-09-03",
+    "goal_config": {
+      "objective": "traffic",
+      "optimization_event": "link_click"
+    },
+    "publisher_platforms": ["drammens_tidende", "nettavisen", "romerikes_blad"],
+    "material": {
+      "target_url": "https://megler.no/eiendom/123",
+      "images": ["https://example.com/property-photo.jpg"],
+      "videos": ["https://example.com/property-tour.mp4"],
+      "html5": ["https://example.com/creatives/majorstuenveien-14.html"]
+    }
+  }'
+```
+
+## Response
+
+### Success (201)
+
+Returns the created ad, including the publisher-generated `ad_id` and initial `status`.
+
+<ResponseField name="ad_id" type="string">
+    Publisher-generated ad id. Targeter uses this on all later ad calls.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+    `draft`, `pending_review`, `scheduled`, `active`, `paused`, `completed`, `rejected`, or `error`
+</ResponseField>
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "campaign_id": "AbC123xyz",
+    "office_id": "off_8k2mQx",
+    "name": "Majorstuenveien 14",
+    "status": "pending_review",
+    "budget": 5000,
+    "target_location": {
+        "country": "NO",
+        "cities": ["Oslo"],
+        "radius_km": 10
+    },
+    "start_date": "2026-08-20",
+    "end_date": "2026-09-03",
+    "goal_config": {
+        "objective": "traffic",
+        "optimization_event": "link_click"
+    },
+    "publisher_platforms": ["drammens_tidende", "nettavisen", "romerikes_blad"],
+    "material": {
+        "target_url": "https://megler.no/eiendom/123",
+        "images": ["https://example.com/property-photo.jpg"],
+        "videos": ["https://example.com/property-tour.mp4"],
+        "html5": ["https://example.com/creatives/majorstuenveien-14.html"]
+    },
+    "created_at": "2026-08-19T08:12:00Z",
+    "updated_at": "2026-08-19T08:12:00Z"
+}
+```
+
+## Error Responses
+
+### 400 - Invalid request payload
+
+```json
+{
+    "error": "Invalid request payload",
+    "details": [
+        {
+            "path": ["material", "target_url"],
+            "message": "Target URL is required"
+        }
+    ]
+}
+```
+
+Reject the request if `end_date` is before `start_date`, if `publisher_platforms` is empty, or if `material` has no `images`, `videos`, or `html5`.
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Office not found
+
+```json
+{
+    "error": "Office not found"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

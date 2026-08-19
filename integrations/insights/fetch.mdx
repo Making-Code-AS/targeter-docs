@@ -1,0 +1,175 @@
+---
+title: 'Fetch insight'
+description: 'Return performance metrics for an ad over a date range'
+openapi: 'integrations/openapi.json GET /ads/{ad_id}/insights'
+---
+
+## Overview
+
+Return performance metrics for an ad. Targeter uses this to populate campaign stats in the app.
+
+Dates are inclusive `YYYY-MM-DD`. Omit both `from_date` and `to_date` to return lifetime totals from the ad `start_date` through today.
+
+Metrics should match what Targeter already shows on campaigns: impressions, clicks, spend, CPM, CPC, CTR, reach, frequency, conversions, and video quartiles when the creative is video.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="from_date" type="string">
+    Start of the reporting window (inclusive)
+</ParamField>
+
+<ParamField query="to_date" type="string">
+    End of the reporting window (inclusive)
+</ParamField>
+
+### Example Request
+
+```bash
+curl "https://publisher.example.com/v1/ads/ad_9pL2wR/insights?from_date=2026-08-01&to_date=2026-08-19" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="ad_id" type="string">
+    Publisher-generated ad id
+</ResponseField>
+
+<ResponseField name="insights" type="object">
+    Aggregated metrics for the requested window
+</ResponseField>
+
+<ResponseField name="insights.impressions" type="integer">
+    Total ad impressions
+</ResponseField>
+
+<ResponseField name="insights.clicks" type="integer">
+    Total ad clicks
+</ResponseField>
+
+<ResponseField name="insights.spend" type="number">
+    Amount spent in `insights.currency`
+</ResponseField>
+
+<ResponseField name="insights.currency" type="string">
+    ISO 4217 currency code
+</ResponseField>
+
+<ResponseField name="insights.cpm" type="number">
+    Cost per 1,000 impressions
+</ResponseField>
+
+<ResponseField name="insights.cpc" type="number">
+    Cost per click
+</ResponseField>
+
+<ResponseField name="insights.ctr" type="number">
+    Click-through rate (`clicks / impressions`)
+</ResponseField>
+
+<ResponseField name="insights.reach" type="integer">
+    Unique people reached
+</ResponseField>
+
+<ResponseField name="insights.frequency" type="number">
+    Average impressions per person reached
+</ResponseField>
+
+<ResponseField name="insights.conversion" type="integer">
+    Total conversions
+</ResponseField>
+
+<ResponseField name="insights.cost_per_conversion" type="number">
+    Average cost per conversion
+</ResponseField>
+
+<ResponseField name="insights.video_views" type="object">
+    Video completion quartiles (`p25`, `p50`, `p75`, `p100`). Omit when the ad has no video.
+</ResponseField>
+
+<ResponseField name="insights.from_date" type="string">
+    Start of the window actually returned
+</ResponseField>
+
+<ResponseField name="insights.to_date" type="string">
+    End of the window actually returned
+</ResponseField>
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "insights": {
+        "impressions": 12500,
+        "clicks": 340,
+        "spend": 1500,
+        "currency": "NOK",
+        "cpm": 120.0,
+        "cpc": 4.41,
+        "ctr": 0.0272,
+        "reach": 8200,
+        "frequency": 1.52,
+        "conversion": 28,
+        "cost_per_conversion": 53.57,
+        "video_views": {
+            "p25": 5469,
+            "p50": 4031,
+            "p75": 2472,
+            "p100": 1031
+        },
+        "from_date": "2026-08-01",
+        "to_date": "2026-08-19"
+    }
+}
+```
+
+<Note>
+    Return zeros rather than omitting core counters (`impressions`, `clicks`, `spend`) when the ad has not delivered yet.
+</Note>
+
+## Error Responses
+
+### 400 - Invalid request payload
+
+```json
+{
+    "error": "to_date must be on or after from_date"
+}
+```
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

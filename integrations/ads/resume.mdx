@@ -1,0 +1,90 @@
+---
+title: 'Resume ad'
+description: 'Restart delivery for a paused ad'
+openapi: 'integrations/openapi.json POST /ads/{ad_id}/resume'
+---
+
+## Overview
+
+Resume a `paused` ad. If `start_date` is still in the future, return `scheduled`. If the flight is in progress, return `active`. If `end_date` has passed, return **409** instead of completing the ad implicitly.
+
+Do not change budget, dates, or creatives.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST "https://publisher.example.com/v1/ads/ad_9pL2wR/resume" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="ad_id" type="string">
+    Publisher-generated ad id
+</ResponseField>
+
+<ResponseField name="status" type="string">
+    `scheduled` or `active` after resume
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+    UTC timestamp of the status change
+</ResponseField>
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "status": "active",
+    "updated_at": "2026-08-19T09:05:00Z"
+}
+```
+
+## Error Responses
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 409 - Ad cannot be resumed
+
+```json
+{
+    "error": "Ad cannot be resumed while status is completed"
+}
+```
+
+Resuming an ad that is already `active` or `scheduled` should return **200** with the current status (idempotent).
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

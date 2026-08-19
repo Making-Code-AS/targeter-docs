@@ -1,0 +1,84 @@
+---
+title: 'Get publisher platforms'
+description: 'List the channels Targeter may request when creating or updating an ad'
+openapi: 'integrations/openapi.json GET /publisher-platforms'
+---
+
+## Overview
+
+Return the publisher channels Targeter is allowed to pass in `publisher_platforms` on [Create ad](/integrations/ads/create) and [Update ad](/integrations/ads/update).
+
+`id` must be stable. Targeter stores these ids and sends them back unchanged. `formats` tells Targeter which creative types (`image`, `video`, `html5`) each channel accepts.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Example Request
+
+```bash
+curl "https://publisher.example.com/v1/publisher-platforms" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="publisher_platforms" type="object[]">
+    Channels available for delivery
+</ResponseField>
+
+<ResponseField name="publisher_platforms.id" type="string">
+    Stable platform id to pass when creating an ad
+</ResponseField>
+
+<ResponseField name="publisher_platforms.name" type="string">
+    Human-readable platform name
+</ResponseField>
+
+<ResponseField name="publisher_platforms.formats" type="string[]">
+    Creative formats this platform accepts: `image`, `video`, and/or `html5`
+</ResponseField>
+
+```json
+{
+    "publisher_platforms": [
+        {
+            "id": "drammens_tidende",
+            "name": "Drammens Tidende",
+            "formats": ["image", "video", "html5"]
+        },
+        {
+            "id": "nettavisen",
+            "name": "Nettavisen",
+            "formats": ["image", "video", "html5"]
+        },
+        {
+            "id": "romerikes_blad",
+            "name": "Romerikes Blad",
+            "formats": ["image", "video", "html5"]
+        }
+    ]
+}
+```
+
+## Error Responses
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

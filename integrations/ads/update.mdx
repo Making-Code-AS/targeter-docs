@@ -1,0 +1,140 @@
+---
+title: 'Update ad'
+description: 'Change mutable fields on an existing ad'
+openapi: 'integrations/openapi.json PATCH /ads/{ad_id}'
+---
+
+## Overview
+
+Update an existing ad. Omitted fields stay unchanged. `campaign_id` and `office_id` cannot be changed after creation.
+
+Targeter uses this for budget changes, flight date shifts, creative swaps, targeting edits, and platform mix updates.
+
+Return **409** if the ad is `completed`, `rejected`, or otherwise not editable.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+- `Content-Type: application/json`
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Body Parameters
+
+All fields are optional. Send only the fields that should change. Shapes match [Create ad](/integrations/ads/create).
+
+<ParamField path="name" type="string">
+    Ad name / title
+</ParamField>
+
+<ParamField path="budget" type="number">
+    Updated spend cap
+</ParamField>
+
+<ParamField path="target_location" type="object">
+    Updated geographic targeting
+</ParamField>
+
+<ParamField path="start_date" type="string">
+    First delivery day (inclusive), `YYYY-MM-DD`
+</ParamField>
+
+<ParamField path="end_date" type="string">
+    Last delivery day (inclusive), `YYYY-MM-DD`
+</ParamField>
+
+<ParamField path="goal_config" type="object">
+    Updated objective and optimization event
+</ParamField>
+
+<ParamField path="publisher_platforms" type="string[]">
+    Replacement list of platform ids (not a patch merge)
+</ParamField>
+
+<ParamField path="material" type="object">
+    Replacement landing page and creatives. Include `target_url` plus at least one of `images`, `videos`, or `html5`.
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X PATCH "https://publisher.example.com/v1/ads/ad_9pL2wR" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "budget": 7500,
+    "end_date": "2026-09-10"
+  }'
+```
+
+## Response
+
+### Success (200)
+
+Returns the full ad after the update, including `ad_id` and current `status`.
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "campaign_id": "AbC123xyz",
+    "office_id": "off_8k2mQx",
+    "name": "Majorstuenveien 14",
+    "status": "active",
+    "budget": 7500,
+    "end_date": "2026-09-10"
+}
+```
+
+## Error Responses
+
+### 400 - Invalid request payload
+
+```json
+{
+    "error": "Invalid request payload",
+    "details": [
+        {
+            "path": ["end_date"],
+            "message": "end_date must be on or after start_date"
+        }
+    ]
+}
+```
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 409 - Ad cannot be updated
+
+```json
+{
+    "error": "Ad cannot be updated while status is completed"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

@@ -1,0 +1,72 @@
+---
+title: 'Delete ad'
+description: 'Permanently remove an ad from the publisher'
+openapi: 'integrations/openapi.json DELETE /ads/{ad_id}'
+---
+
+## Overview
+
+Permanently remove an ad. Targeter uses this when the campaign should not remain in your system.
+
+Prefer [Pause ad](/integrations/ads/pause) when delivery should stop but insights must still be available.
+
+Return **204** with no body. Subsequent status or insight calls for this `ad_id` should return **404**.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X DELETE "https://publisher.example.com/v1/ads/ad_9pL2wR" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (204)
+
+Empty body.
+
+## Error Responses
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 409 - Ad cannot be deleted
+
+```json
+{
+    "error": "Ad cannot be deleted while delivery is still settling"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

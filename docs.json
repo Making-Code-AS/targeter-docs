@@ -7,11 +7,16 @@
         "light": "#0FB8CB"
     },
     "favicon": "/favicon.ico",
-    "openapi": "api-reference/openapi.json",
+    "api": {
+        "openapi": [
+            "api-reference/openapi.json",
+            "integrations/openapi.json"
+        ]
+    },
     "navigation": {
         "tabs": [
             {
-                "tab": "Pages",
+                "tab": "API",
                 "groups": [
                     {
                         "group": "Introduction",
@@ -30,6 +35,44 @@
                                 ]
                             }
                         ]
+                    }
+                ]
+            },
+            {
+                "tab": "Integrations",
+                "groups": [
+                    {
+                        "group": "Getting started",
+                        "pages": [
+                            "integrations/introduction",
+                            "integrations/setup"
+                        ]
+                    },
+                    {
+                        "group": "Offices",
+                        "pages": [
+                            "integrations/offices/create",
+                            "integrations/offices/get"
+                        ]
+                    },
+                    {
+                        "group": "Ads",
+                        "pages": [
+                            "integrations/ads/create",
+                            "integrations/ads/update",
+                            "integrations/ads/delete",
+                            "integrations/ads/pause",
+                            "integrations/ads/resume",
+                            "integrations/ads/status"
+                        ]
+                    },
+                    {
+                        "group": "Insights",
+                        "pages": ["integrations/insights/fetch"]
+                    },
+                    {
+                        "group": "Platforms",
+                        "pages": ["integrations/platforms/get"]
                     }
                 ]
             }

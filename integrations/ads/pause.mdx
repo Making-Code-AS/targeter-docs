@@ -1,0 +1,90 @@
+---
+title: 'Pause ad'
+description: 'Stop delivery for an ad without deleting it'
+openapi: 'integrations/openapi.json POST /ads/{ad_id}/pause'
+---
+
+## Overview
+
+Stop delivery for an `active` or `scheduled` ad. The ad stays in your system so Targeter can still [fetch insights](/integrations/insights/fetch) and later [resume](/integrations/ads/resume) it.
+
+Do not change budget, dates, or creatives. Only `status` should become `paused`.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST "https://publisher.example.com/v1/ads/ad_9pL2wR/pause" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="ad_id" type="string">
+    Publisher-generated ad id
+</ResponseField>
+
+<ResponseField name="status" type="string">
+    Always `paused` on success
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+    UTC timestamp of the status change
+</ResponseField>
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "status": "paused",
+    "updated_at": "2026-08-19T09:00:00Z"
+}
+```
+
+## Error Responses
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 409 - Ad cannot be paused
+
+```json
+{
+    "error": "Ad cannot be paused while status is completed"
+}
+```
+
+Pausing an ad that is already `paused` should return **200** with `status: "paused"` (idempotent), not **409**.
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

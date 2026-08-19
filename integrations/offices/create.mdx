@@ -1,0 +1,90 @@
+---
+title: 'Create office'
+description: 'Create a broker or advertiser office; the publisher generates office_id'
+openapi: 'integrations/openapi.json POST /offices'
+---
+
+## Overview
+
+Create an office in the publisher system so ads can be attributed and billed correctly. You generate `office_id`. Targeter stores that id and sends it on later ad calls.
+
+If an office with the same `name` already exists, return **200** with the existing office instead of creating a duplicate.
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+- `Content-Type: application/json`
+
+### Body Parameters
+
+<ParamField path="name" type="string" required>
+    Office display name as used in Targeter (for example a brokerage office)
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST "https://publisher.example.com/v1/offices" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Torshov"
+  }'
+```
+
+## Response
+
+### Success (201 — new office)
+
+<ResponseField name="office_id" type="string">
+    Publisher-generated office id
+</ResponseField>
+
+<ResponseField name="name" type="string">
+    Office display name
+</ResponseField>
+
+```json
+{
+    "office_id": "off_8k2mQx",
+    "name": "Torshov"
+}
+```
+
+### Success (200 — existing office)
+
+Same body as **201** when `name` already exists.
+
+## Error Responses
+
+### 400 - Invalid request payload
+
+```json
+{
+    "error": "Invalid request payload",
+    "details": [
+        {
+            "path": ["name"],
+            "message": "Invalid input: expected string, received undefined"
+        }
+    ]
+}
+```
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```

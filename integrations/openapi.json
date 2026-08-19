@@ -1,0 +1,1115 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Targeter Ideal Publisher API",
+        "description": "Contract Targeter expects from publisher and media platforms it creates ads on and fetches insights from. Implement these endpoints so Targeter can manage offices, ads, and reporting against your system.",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Targeter Integration Support"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://{publisher_host}/v1",
+            "description": "Publisher API host (provided during integration setup)",
+            "variables": {
+                "publisher_host": {
+                    "default": "publisher.example.com"
+                }
+            }
+        }
+    ],
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Offices",
+            "description": "Broker or advertiser offices that ads are billed and attributed to"
+        },
+        {
+            "name": "Ads",
+            "description": "Create, update, pause, resume, and delete ads"
+        },
+        {
+            "name": "Insights",
+            "description": "Performance reporting for ads Targeter has created"
+        },
+        {
+            "name": "Platforms",
+            "description": "Publisher channels available for delivery"
+        }
+    ],
+    "paths": {
+        "/offices": {
+            "post": {
+                "tags": ["Offices"],
+                "summary": "Create office",
+                "operationId": "createOffice",
+                "description": "Create an office in the publisher system. The publisher generates `office_id`. If an office with the same `name` already exists, return **200** with the existing office instead of creating a duplicate.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateOfficeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Office created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Office"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Office already exists for the given name",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Office"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Offices"],
+                "summary": "Get office ID",
+                "operationId": "getOffice",
+                "description": "Resolve an office in the publisher system and return its generated `office_id`. Look up by `name` and/or publisher `id`.",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "description": "Office display name as known in Targeter",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Torshov"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "description": "Publisher-generated office id, if already known",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "off_8k2mQx"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Office found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Office"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "description": "Office not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Office not found"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/publisher-platforms": {
+            "get": {
+                "tags": ["Platforms"],
+                "summary": "Get publisher platforms",
+                "operationId": "getPublisherPlatforms",
+                "description": "Return the publisher channels Targeter may pass in `publisher_platforms` when creating or updating an ad. Use this so Targeter only requests placements your system can deliver.",
+                "responses": {
+                    "200": {
+                        "description": "Available publisher platforms",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublisherPlatformsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads": {
+            "post": {
+                "tags": ["Ads"],
+                "summary": "Create ad",
+                "operationId": "createAd",
+                "description": "Create an ad under a Targeter campaign. At least one creative in `material` is required (image, video, or HTML5). Return the publisher-generated `ad_id` and initial status.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAdRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ad created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ad"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "description": "Referenced office or campaign not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Office not found"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads/{ad_id}": {
+            "patch": {
+                "tags": ["Ads"],
+                "summary": "Update ad",
+                "operationId": "updateAd",
+                "description": "Update mutable fields on an existing ad. Omitted fields are left unchanged. `campaign_id` and `office_id` are immutable after creation.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAdRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ad updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ad"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "409": {
+                        "description": "Ad cannot be updated in its current status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Ad cannot be updated while status is completed"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Ads"],
+                "summary": "Delete ad",
+                "operationId": "deleteAd",
+                "description": "Permanently remove an ad from the publisher. Prefer pause when the ad should stop delivery but remain available for reporting.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Ad deleted"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "409": {
+                        "description": "Ad cannot be deleted in its current status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Ad cannot be deleted while delivery is still settling"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads/{ad_id}/pause": {
+            "post": {
+                "tags": ["Ads"],
+                "summary": "Pause ad",
+                "operationId": "pauseAd",
+                "description": "Stop delivery for an active or scheduled ad. The ad remains available for insights and can be resumed later.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ad paused",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdStatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "409": {
+                        "description": "Ad cannot be paused in its current status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Ad cannot be paused while status is completed"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads/{ad_id}/resume": {
+            "post": {
+                "tags": ["Ads"],
+                "summary": "Resume ad",
+                "operationId": "resumeAd",
+                "description": "Resume delivery for a paused ad. If `start_date` is in the future, status should become `scheduled` rather than `active`.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ad resumed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdStatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "409": {
+                        "description": "Ad cannot be resumed in its current status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "error": "Ad cannot be resumed while status is completed"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads/{ad_id}/status": {
+            "get": {
+                "tags": ["Ads"],
+                "summary": "Get ad status",
+                "operationId": "getAdStatus",
+                "description": "Return the current delivery status of an ad, plus timestamps Targeter uses to sync campaign state.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current ad status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdStatusResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        },
+        "/ads/{ad_id}/insights": {
+            "get": {
+                "tags": ["Insights"],
+                "summary": "Fetch insight",
+                "operationId": "fetchInsight",
+                "description": "Return performance metrics for an ad over an inclusive date range. Dates use `YYYY-MM-DD`. Omit both dates to return lifetime totals from `start_date` through today.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdId"
+                    },
+                    {
+                        "name": "from_date",
+                        "in": "query",
+                        "required": false,
+                        "description": "Start of the reporting window (inclusive). ISO 8601 date.",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-08-01"
+                    },
+                    {
+                        "name": "to_date",
+                        "in": "query",
+                        "required": false,
+                        "description": "End of the reporting window (inclusive). ISO 8601 date.",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "example": "2026-08-19"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Insights for the requested window",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InsightResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/AdNotFound"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ServerError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "API token issued to Targeter during integration setup. Send as `Authorization: Bearer <token>`."
+            }
+        },
+        "parameters": {
+            "AdId": {
+                "name": "ad_id",
+                "in": "path",
+                "required": true,
+                "description": "Publisher-generated ad id returned from `POST /ads`",
+                "schema": {
+                    "type": "string"
+                },
+                "example": "ad_9pL2wR"
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "Invalid request payload",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "error": "Invalid request payload",
+                            "details": [
+                                {
+                                    "path": ["name"],
+                                    "message": "Invalid input: expected string, received undefined"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "Missing Authorization header, or invalid or expired token",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "examples": {
+                            "missingHeader": {
+                                "value": {
+                                    "error": "Missing or invalid Authorization header"
+                                }
+                            },
+                            "invalidToken": {
+                                "value": {
+                                    "error": "Invalid or expired token"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "AdNotFound": {
+                "description": "Ad not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "error": "Ad not found"
+                        }
+                    }
+                }
+            },
+            "ServerError": {
+                "description": "Internal server error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "error": "Unexpected server error. Please try again later."
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "required": ["error"],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "Error message",
+                        "example": "Missing required field"
+                    },
+                    "details": {
+                        "type": "array",
+                        "description": "Per-field validation issues",
+                        "items": {
+                            "type": "object",
+                            "required": ["message"],
+                            "properties": {
+                                "path": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "example": ["material", "target_url"]
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Target URL is required"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Office": {
+                "type": "object",
+                "required": ["office_id", "name"],
+                "properties": {
+                    "office_id": {
+                        "type": "string",
+                        "description": "Publisher-generated office id",
+                        "example": "off_8k2mQx"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Office display name",
+                        "example": "Torshov"
+                    }
+                }
+            },
+            "CreateOfficeRequest": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Office display name as used in Targeter",
+                        "example": "Torshov"
+                    }
+                }
+            },
+            "PublisherPlatform": {
+                "type": "object",
+                "required": ["id", "name"],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Stable platform id to pass in `publisher_platforms`",
+                        "example": "drammens_tidende"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Human-readable platform name",
+                        "example": "Drammens Tidende"
+                    },
+                    "formats": {
+                        "type": "array",
+                        "description": "Creative formats this platform accepts",
+                        "items": {
+                            "type": "string",
+                            "enum": ["image", "video", "html5"]
+                        },
+                        "example": ["image", "video"]
+                    }
+                }
+            },
+            "PublisherPlatformsResponse": {
+                "type": "object",
+                "required": ["publisher_platforms"],
+                "properties": {
+                    "publisher_platforms": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PublisherPlatform"
+                        }
+                    }
+                }
+            },
+            "Budget": {
+                "type": "number",
+                "description": "Spend cap for the ad",
+                "example": 5000
+            },
+            "TargetLocation": {
+                "type": "object",
+                "required": ["country"],
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "description": "ISO 3166-1 alpha-2 country code",
+                        "example": "NO"
+                    },
+                    "regions": {
+                        "type": "array",
+                        "description": "Region or county names",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["Oslo"]
+                    },
+                    "cities": {
+                        "type": "array",
+                        "description": "City names",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["Oslo"]
+                    },
+                    "radius_km": {
+                        "type": "number",
+                        "description": "Optional radius in kilometres around the given cities",
+                        "example": 10
+                    }
+                }
+            },
+            "GoalConfig": {
+                "type": "object",
+                "required": ["objective"],
+                "properties": {
+                    "objective": {
+                        "type": "string",
+                        "description": "Campaign objective Targeter is optimizing for",
+                        "enum": ["traffic", "conversions", "awareness", "leads"],
+                        "example": "traffic"
+                    },
+                    "optimization_event": {
+                        "type": "string",
+                        "description": "Event to optimize delivery against",
+                        "enum": ["impression", "link_click", "landing_page_view", "lead", "purchase"],
+                        "example": "link_click"
+                    }
+                }
+            },
+            "Material": {
+                "type": "object",
+                "required": ["target_url"],
+                "properties": {
+                    "target_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Landing page URL for the ad",
+                        "example": "https://megler.no/eiendom/123"
+                    },
+                    "images": {
+                        "type": "array",
+                        "description": "Publicly reachable image URLs",
+                        "items": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "example": ["https://example.com/property-photo.jpg"]
+                    },
+                    "videos": {
+                        "type": "array",
+                        "description": "Publicly reachable video URLs",
+                        "items": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "https://example.com/property-tour.mp4"
+                        },
+                        "example": ["https://example.com/property-tour.mp4"]
+                    },
+                    "html5": {
+                        "type": "array",
+                        "description": "Publicly reachable HTML5 creative URLs",
+                        "items": {
+                            "type": "string",
+                            "format": "uri",
+                            "example": "https://example.com/creatives/majorstuenveien-14.html"
+                        },
+                        "example": ["https://example.com/creatives/majorstuenveien-14.html"]
+                    }
+                }
+            },
+            "AdStatus": {
+                "type": "string",
+                "description": "Delivery status of the ad",
+                "enum": [
+                    "draft",
+                    "pending_review",
+                    "scheduled",
+                    "active",
+                    "paused",
+                    "completed",
+                    "rejected",
+                    "error"
+                ],
+                "example": "active"
+            },
+            "Ad": {
+                "type": "object",
+                "required": [
+                    "ad_id",
+                    "campaign_id",
+                    "office_id",
+                    "name",
+                    "status",
+                    "budget",
+                    "target_location",
+                    "start_date",
+                    "end_date",
+                    "goal_config",
+                    "publisher_platforms",
+                    "material"
+                ],
+                "properties": {
+                    "ad_id": {
+                        "type": "string",
+                        "description": "Publisher-generated ad id",
+                        "example": "ad_9pL2wR"
+                    },
+                    "campaign_id": {
+                        "type": "string",
+                        "description": "Targeter campaign id this ad belongs to",
+                        "example": "AbC123xyz"
+                    },
+                    "office_id": {
+                        "type": "string",
+                        "description": "Publisher office id from `POST /offices` or `GET /offices`",
+                        "example": "off_8k2mQx"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Ad name / title",
+                        "example": "Majorstuenveien 14"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AdStatus"
+                    },
+                    "budget": {
+                        "$ref": "#/components/schemas/Budget"
+                    },
+                    "target_location": {
+                        "$ref": "#/components/schemas/TargetLocation"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "First day the ad may deliver (inclusive)",
+                        "example": "2026-08-20"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Last day the ad may deliver (inclusive)",
+                        "example": "2026-09-03"
+                    },
+                    "goal_config": {
+                        "$ref": "#/components/schemas/GoalConfig"
+                    },
+                    "publisher_platforms": {
+                        "type": "array",
+                        "description": "Platform ids from `GET /publisher-platforms`",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["drammens_tidende", "nettavisen", "romerikes_blad"]
+                    },
+                    "material": {
+                        "$ref": "#/components/schemas/Material"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-19T08:12:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-19T08:12:00Z"
+                    }
+                }
+            },
+            "CreateAdRequest": {
+                "type": "object",
+                "required": [
+                    "campaign_id",
+                    "office_id",
+                    "name",
+                    "budget",
+                    "target_location",
+                    "start_date",
+                    "end_date",
+                    "goal_config",
+                    "publisher_platforms",
+                    "material"
+                ],
+                "properties": {
+                    "campaign_id": {
+                        "type": "string",
+                        "description": "Targeter campaign id this ad belongs to",
+                        "example": "AbC123xyz"
+                    },
+                    "office_id": {
+                        "type": "string",
+                        "description": "Publisher office id from `POST /offices` or `GET /offices`",
+                        "example": "off_8k2mQx"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Ad name / title",
+                        "example": "Majorstuenveien 14"
+                    },
+                    "budget": {
+                        "$ref": "#/components/schemas/Budget"
+                    },
+                    "target_location": {
+                        "$ref": "#/components/schemas/TargetLocation"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-08-20"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-09-03"
+                    },
+                    "goal_config": {
+                        "$ref": "#/components/schemas/GoalConfig"
+                    },
+                    "publisher_platforms": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["drammens_tidende", "nettavisen", "romerikes_blad"]
+                    },
+                    "material": {
+                        "$ref": "#/components/schemas/Material"
+                    }
+                }
+            },
+            "UpdateAdRequest": {
+                "type": "object",
+                "description": "Any subset of mutable ad fields. Omitted fields are unchanged.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Majorstuenveien 14 — oppdatert"
+                    },
+                    "budget": {
+                        "$ref": "#/components/schemas/Budget"
+                    },
+                    "target_location": {
+                        "$ref": "#/components/schemas/TargetLocation"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "goal_config": {
+                        "$ref": "#/components/schemas/GoalConfig"
+                    },
+                    "publisher_platforms": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "material": {
+                        "$ref": "#/components/schemas/Material"
+                    }
+                }
+            },
+            "AdStatusResponse": {
+                "type": "object",
+                "required": ["ad_id", "status"],
+                "properties": {
+                    "ad_id": {
+                        "type": "string",
+                        "example": "ad_9pL2wR"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/AdStatus"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-19T09:00:00Z"
+                    }
+                }
+            },
+            "VideoViewQuartiles": {
+                "type": "object",
+                "properties": {
+                    "p25": {
+                        "type": "integer",
+                        "example": 5469
+                    },
+                    "p50": {
+                        "type": "integer",
+                        "example": 4031
+                    },
+                    "p75": {
+                        "type": "integer",
+                        "example": 2472
+                    },
+                    "p100": {
+                        "type": "integer",
+                        "example": 1031
+                    }
+                }
+            },
+            "InsightResponse": {
+                "type": "object",
+                "required": ["ad_id", "insights"],
+                "properties": {
+                    "ad_id": {
+                        "type": "string",
+                        "example": "ad_9pL2wR"
+                    },
+                    "insights": {
+                        "type": "object",
+                        "properties": {
+                            "impressions": {
+                                "type": "integer",
+                                "example": 12500
+                            },
+                            "clicks": {
+                                "type": "integer",
+                                "example": 340
+                            },
+                            "spend": {
+                                "type": "number",
+                                "description": "Amount spent in the ad currency",
+                                "example": 1500
+                            },
+                            "currency": {
+                                "type": "string",
+                                "example": "NOK"
+                            },
+                            "cpm": {
+                                "type": "number",
+                                "example": 120.0
+                            },
+                            "cpc": {
+                                "type": "number",
+                                "example": 4.41
+                            },
+                            "ctr": {
+                                "type": "number",
+                                "example": 0.0272
+                            },
+                            "reach": {
+                                "type": "integer",
+                                "example": 8200
+                            },
+                            "frequency": {
+                                "type": "number",
+                                "example": 1.52
+                            },
+                            "conversion": {
+                                "type": "integer",
+                                "example": 28
+                            },
+                            "cost_per_conversion": {
+                                "type": "number",
+                                "example": 53.57
+                            },
+                            "video_views": {
+                                "$ref": "#/components/schemas/VideoViewQuartiles"
+                            },
+                            "from_date": {
+                                "type": "string",
+                                "format": "date",
+                                "example": "2026-08-01"
+                            },
+                            "to_date": {
+                                "type": "string",
+                                "format": "date",
+                                "example": "2026-08-19"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

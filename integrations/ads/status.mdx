@@ -1,0 +1,91 @@
+---
+title: 'Get ad status'
+description: 'Return the current delivery status of an ad'
+openapi: 'integrations/openapi.json GET /ads/{ad_id}/status'
+---
+
+## Overview
+
+Return the current delivery status so Targeter can sync campaign state. Targeter polls this while a campaign is live and after pause, resume, or review.
+
+### Status values
+
+| Status | Meaning |
+| --- | --- |
+| `draft` | Created but not yet submitted for delivery |
+| `pending_review` | Waiting on publisher or policy review |
+| `scheduled` | Approved; `start_date` is in the future |
+| `active` | Currently delivering |
+| `paused` | Delivery stopped by Targeter or the publisher |
+| `completed` | Flight ended or budget exhausted |
+| `rejected` | Review failed; the ad will not deliver |
+| `error` | Publisher-side failure; include enough in `error` payloads for Targeter to retry or surface the issue |
+
+## Request
+
+### Headers
+
+- `Authorization: Bearer {token}` (required)
+
+### Path Parameters
+
+<ParamField path="ad_id" type="string" required>
+    Publisher-generated ad id returned from [Create ad](/integrations/ads/create)
+</ParamField>
+
+### Example Request
+
+```bash
+curl "https://publisher.example.com/v1/ads/ad_9pL2wR/status" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Response
+
+### Success (200)
+
+<ResponseField name="ad_id" type="string">
+    Publisher-generated ad id
+</ResponseField>
+
+<ResponseField name="status" type="string">
+    Current delivery status
+</ResponseField>
+
+<ResponseField name="updated_at" type="string">
+    UTC timestamp of the last status change
+</ResponseField>
+
+```json
+{
+    "ad_id": "ad_9pL2wR",
+    "status": "active",
+    "updated_at": "2026-08-20T06:00:00Z"
+}
+```
+
+## Error Responses
+
+### 401 - Unauthorized
+
+```json
+{
+    "error": "Missing or invalid Authorization header"
+}
+```
+
+### 404 - Ad not found
+
+```json
+{
+    "error": "Ad not found"
+}
+```
+
+### 500 - Server Error
+
+```json
+{
+    "error": "Unexpected server error. Please try again later."
+}
+```
