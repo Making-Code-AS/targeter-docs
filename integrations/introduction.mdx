@@ -5,7 +5,7 @@ description: 'Ideal API contract for platforms Targeter creates ads on and fetch
 
 ## What this is
 
-Targeter’s partner API (under **Pages**) is how external systems call Targeter.
+Targeter’s partner API (under **API**) is how external systems call Targeter.
 
 This section is the other direction: how **Targeter calls your API**. It is the ideal contract for publishers, media houses, and ad platforms that Targeter creates ads on and pulls reporting from.
 
@@ -19,7 +19,7 @@ All requests are made to the host you provide during setup:
 https://{publisher_host}/v1
 ```
 
-Use snake_case JSON, ISO 8601 dates (`YYYY-MM-DD`), and ISO 4217 currency codes.
+Use snake_case JSON, UTC ISO 8601 timestamps for ad flights, `YYYY-MM-DD` for insight windows, and ISO 4217 currency codes.
 
 ## Authentication
 

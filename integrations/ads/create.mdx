@@ -49,20 +49,24 @@ At least one creative in `material` is required: `images`, `videos`, or `html5`.
     Region or county names
 </ParamField>
 
-<ParamField path="target_location.cities" type="string[]">
-    City names
+<ParamField path="target_location.lat" type="number" required>
+    Latitude of the targeting centre
+</ParamField>
+
+<ParamField path="target_location.long" type="number" required>
+    Longitude of the targeting centre
 </ParamField>
 
 <ParamField path="target_location.radius_km" type="number">
-    Optional radius in kilometres around the given cities
+    Optional radius in kilometres around `lat` and `long`
 </ParamField>
 
 <ParamField path="start_date" type="string" required>
-    First day the ad may deliver (inclusive), `YYYY-MM-DD`
+    When the ad may start delivering (inclusive). UTC ISO 8601 date-time.
 </ParamField>
 
 <ParamField path="end_date" type="string" required>
-    Last day the ad may deliver (inclusive), `YYYY-MM-DD`. Must be on or after `start_date`.
+    When the ad must stop delivering (inclusive). UTC ISO 8601 date-time. Must be on or after `start_date`.
 </ParamField>
 
 <ParamField path="goal_config" type="object" required>
@@ -114,11 +118,12 @@ curl -X POST "https://publisher.example.com/v1/ads" \
     "budget": 5000,
     "target_location": {
       "country": "NO",
-      "cities": ["Oslo"],
+      "lat": 59.9294,
+      "long": 10.7166,
       "radius_km": 10
     },
-    "start_date": "2026-08-20",
-    "end_date": "2026-09-03",
+    "start_date": "2026-08-20T00:00:00Z",
+    "end_date": "2026-09-03T23:59:59Z",
     "goal_config": {
       "objective": "traffic",
       "optimization_event": "link_click"
@@ -157,11 +162,12 @@ Returns the created ad, including the publisher-generated `ad_id` and initial `s
     "budget": 5000,
     "target_location": {
         "country": "NO",
-        "cities": ["Oslo"],
+        "lat": 59.9294,
+        "long": 10.7166,
         "radius_km": 10
     },
-    "start_date": "2026-08-20",
-    "end_date": "2026-09-03",
+    "start_date": "2026-08-20T00:00:00Z",
+    "end_date": "2026-09-03T23:59:59Z",
     "goal_config": {
         "objective": "traffic",
         "optimization_event": "link_click"

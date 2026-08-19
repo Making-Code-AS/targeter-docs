@@ -42,11 +42,11 @@ All fields are optional. Send only the fields that should change. Shapes match [
 </ParamField>
 
 <ParamField path="start_date" type="string">
-    First delivery day (inclusive), `YYYY-MM-DD`
+    When the ad may start delivering (inclusive). UTC ISO 8601 date-time.
 </ParamField>
 
 <ParamField path="end_date" type="string">
-    Last delivery day (inclusive), `YYYY-MM-DD`
+    When the ad must stop delivering (inclusive). UTC ISO 8601 date-time.
 </ParamField>
 
 <ParamField path="goal_config" type="object">
@@ -69,7 +69,7 @@ curl -X PATCH "https://publisher.example.com/v1/ads/ad_9pL2wR" \
   -H "Content-Type: application/json" \
   -d '{
     "budget": 7500,
-    "end_date": "2026-09-10"
+    "end_date": "2026-09-10T23:59:59Z"
   }'
 ```
 
@@ -87,7 +87,7 @@ Returns the full ad after the update, including `ad_id` and current `status`.
     "name": "Majorstuenveien 14",
     "status": "active",
     "budget": 7500,
-    "end_date": "2026-09-10"
+    "end_date": "2026-09-10T23:59:59Z"
 }
 ```
 

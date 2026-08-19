@@ -711,7 +711,7 @@
             },
             "TargetLocation": {
                 "type": "object",
-                "required": ["country"],
+                "required": ["country", "lat", "long"],
                 "properties": {
                     "country": {
                         "type": "string",
@@ -726,17 +726,23 @@
                         },
                         "example": ["Oslo"]
                     },
-                    "cities": {
-                        "type": "array",
-                        "description": "City names",
-                        "items": {
-                            "type": "string"
-                        },
-                        "example": ["Oslo"]
+                    "lat": {
+                        "type": "number",
+                        "description": "Latitude of the targeting centre",
+                        "minimum": -90,
+                        "maximum": 90,
+                        "example": 59.9294
+                    },
+                    "long": {
+                        "type": "number",
+                        "description": "Longitude of the targeting centre",
+                        "minimum": -180,
+                        "maximum": 180,
+                        "example": 10.7166
                     },
                     "radius_km": {
                         "type": "number",
-                        "description": "Optional radius in kilometres around the given cities",
+                        "description": "Optional radius in kilometres around `lat` and `long`",
                         "example": 10
                     }
                 }
@@ -863,15 +869,15 @@
                     },
                     "start_date": {
                         "type": "string",
-                        "format": "date",
-                        "description": "First day the ad may deliver (inclusive)",
-                        "example": "2026-08-20"
+                        "format": "date-time",
+                        "description": "When the ad may start delivering (inclusive)",
+                        "example": "2026-08-20T00:00:00Z"
                     },
                     "end_date": {
                         "type": "string",
-                        "format": "date",
-                        "description": "Last day the ad may deliver (inclusive)",
-                        "example": "2026-09-03"
+                        "format": "date-time",
+                        "description": "When the ad must stop delivering (inclusive)",
+                        "example": "2026-09-03T23:59:59Z"
                     },
                     "goal_config": {
                         "$ref": "#/components/schemas/GoalConfig"
@@ -937,13 +943,13 @@
                     },
                     "start_date": {
                         "type": "string",
-                        "format": "date",
-                        "example": "2026-08-20"
+                        "format": "date-time",
+                        "example": "2026-08-20T00:00:00Z"
                     },
                     "end_date": {
                         "type": "string",
-                        "format": "date",
-                        "example": "2026-09-03"
+                        "format": "date-time",
+                        "example": "2026-09-03T23:59:59Z"
                     },
                     "goal_config": {
                         "$ref": "#/components/schemas/GoalConfig"
@@ -977,11 +983,11 @@
                     },
                     "start_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date-time"
                     },
                     "end_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date-time"
                     },
                     "goal_config": {
                         "$ref": "#/components/schemas/GoalConfig"
