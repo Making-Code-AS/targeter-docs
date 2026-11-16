@@ -31,6 +31,25 @@
                             "guides/campaign-plans",
                             "guides/api-keys"
                         ]
+                    },
+                    {
+                        "group": "Campaigns",
+                        "pages": [
+                            "guides/running-campaigns",
+                            "guides/reports"
+                        ]
+                    },
+                    {
+                        "group": "Administration",
+                        "pages": [
+                            "guides/billing"
+                        ]
+                    },
+                    {
+                        "group": "Reference",
+                        "pages": [
+                            "guides/troubleshooting"
+                        ]
                     }
                 ]
             },
@@ -90,15 +109,19 @@
                     },
                     {
                         "group": "Insights",
-                        "pages": ["integrations/insights/fetch"]
+                        "pages": [
+                            "integrations/insights/fetch"
+                        ]
                     },
                     {
                         "group": "Platforms",
-                        "pages": ["integrations/platforms/get"]
+                        "pages": [
+                            "integrations/platforms/get"
+                        ]
                     }
                 ]
             }
-          ]
+        ]
     },
     "logo": {
         "light": "/logo/dark.svg",
