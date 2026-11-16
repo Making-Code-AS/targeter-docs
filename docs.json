@@ -16,52 +16,11 @@
     "navigation": {
         "tabs": [
             {
-                "tab": "Guides",
-                "groups": [
-                    {
-                        "group": "Get started",
-                        "pages": [
-                            "guides/overview"
-                        ]
-                    },
-                    {
-                        "group": "Setup",
-                        "pages": [
-                            "guides/organisation",
-                            "guides/campaign-plans",
-                            "guides/api-keys"
-                        ]
-                    },
-                    {
-                        "group": "Campaigns",
-                        "pages": [
-                            "guides/running-campaigns",
-                            "guides/reports"
-                        ]
-                    },
-                    {
-                        "group": "Administration",
-                        "pages": [
-                            "guides/billing"
-                        ]
-                    },
-                    {
-                        "group": "Reference",
-                        "pages": [
-                            "guides/troubleshooting"
-                        ]
-                    }
-                ]
-            },
-            {
                 "tab": "API",
                 "groups": [
                     {
                         "group": "Introduction",
-                        "pages": [
-                            "index",
-                            "quickstart"
-                        ]
+                        "pages": ["index", "quickstart"]
                     },
                     {
                         "group": "API Reference",
@@ -109,19 +68,15 @@
                     },
                     {
                         "group": "Insights",
-                        "pages": [
-                            "integrations/insights/fetch"
-                        ]
+                        "pages": ["integrations/insights/fetch"]
                     },
                     {
                         "group": "Platforms",
-                        "pages": [
-                            "integrations/platforms/get"
-                        ]
+                        "pages": ["integrations/platforms/get"]
                     }
                 ]
             }
-        ]
+          ]
     },
     "logo": {
         "light": "/logo/dark.svg",
