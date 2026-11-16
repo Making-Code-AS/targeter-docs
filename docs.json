@@ -16,11 +16,33 @@
     "navigation": {
         "tabs": [
             {
+                "tab": "Guides",
+                "groups": [
+                    {
+                        "group": "Get started",
+                        "pages": [
+                            "guides/overview"
+                        ]
+                    },
+                    {
+                        "group": "Setup",
+                        "pages": [
+                            "guides/organisation",
+                            "guides/campaign-plans",
+                            "guides/api-keys"
+                        ]
+                    }
+                ]
+            },
+            {
                 "tab": "API",
                 "groups": [
                     {
                         "group": "Introduction",
-                        "pages": ["index", "quickstart"]
+                        "pages": [
+                            "index",
+                            "quickstart"
+                        ]
                     },
                     {
                         "group": "API Reference",
