@@ -75,14 +75,8 @@
                         "pages": ["integrations/platforms/get"]
                     }
                 ]
-            },
-            {
-              "tab": "Dokumentasjon",
-              "pages": [
-                "best-practices"
-              ]
             }
-        ]
+          ]
     },
     "logo": {
         "light": "/logo/dark.svg",
